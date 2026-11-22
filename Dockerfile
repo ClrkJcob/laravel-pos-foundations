@@ -1,36 +1,34 @@
 
 FROM php:8.5-cli
 
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libsqlite3-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    libcurl4-openssl-dev \
-    && docker-php-ext-install \
+# Install PHP extensions and their required system dependencies
+COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions \
     pdo_sqlite \
     sqlite3 \
     mbstring \
     xml \
     bcmath \
     curl \
-    zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    zip
 
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Copy Laravel application
 COPY . .
 
+# Install Laravel dependencies
 RUN composer install \
     --no-dev \
+    --prefer-dist \
     --optimize-autoloader \
     --no-interaction
 
+# Prepare Laravel directories and SQLite database
 RUN mkdir -p \
     storage/framework/cache \
     storage/framework/sessions \
