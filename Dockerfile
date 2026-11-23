@@ -1,7 +1,7 @@
 
 FROM php:8.5-cli
 
-# Install PHP extensions and their required system dependencies
+# Install PHP extensions
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 
 RUN install-php-extensions \
@@ -11,7 +11,7 @@ RUN install-php-extensions \
     xml \
     bcmath \
     curl \
-    zip
+    zip \
     gd
 
 # Install Composer
@@ -28,7 +28,6 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader \
     --no-interaction
-    RUN php artisan storage:link
 
 # Prepare Laravel directories and SQLite database
 RUN mkdir -p \
@@ -36,10 +35,14 @@ RUN mkdir -p \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
+    storage/app/public \
     bootstrap/cache \
     database \
     && touch database/database.sqlite \
     && chmod -R 775 storage bootstrap/cache database
+
+# Create public storage link
+RUN php artisan storage:link
 
 ENV APP_ENV=production
 ENV APP_DEBUG=false
