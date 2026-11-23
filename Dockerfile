@@ -12,6 +12,7 @@ RUN install-php-extensions \
     bcmath \
     curl \
     zip
+    gd
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -27,6 +28,7 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader \
     --no-interaction
+    RUN php artisan storage:link
 
 # Prepare Laravel directories and SQLite database
 RUN mkdir -p \
