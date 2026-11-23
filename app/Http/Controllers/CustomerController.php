@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class CustomerController extends Controller
 {
     /**
-     * Display all customer accounts.
+     * Display all customers.
      */
     public function index()
     {
@@ -19,7 +19,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * Display the create customer form.
+     * Show the create customer form.
      */
     public function create()
     {
@@ -51,7 +51,15 @@ class CustomerController extends Controller
     }
 
     /**
-     * Display the edit customer form.
+     * Display a specific customer.
+     */
+    public function show(Customer $customer)
+    {
+        return view('customers.show', compact('customer'));
+    }
+
+    /**
+     * Show the edit customer form.
      */
     public function edit(Customer $customer)
     {
@@ -78,5 +86,17 @@ class CustomerController extends Controller
         return redirect()
             ->route('customers.index')
             ->with('success', 'Customer updated successfully!');
+    }
+
+    /**
+     * Delete a customer.
+     */
+    public function destroy(Customer $customer)
+    {
+        $customer->delete();
+
+        return redirect()
+            ->route('customers.index')
+            ->with('success', 'Customer deleted successfully!');
     }
 }

@@ -23,7 +23,7 @@ class UserController extends Controller
     }
 
     /**
-     * Display the create user form.
+     * Show the create user form.
      */
     public function create()
     {
@@ -57,7 +57,15 @@ class UserController extends Controller
     }
 
     /**
-     * Display the edit user form.
+     * Display a specific user.
+     */
+    public function show(PosUser $user)
+    {
+        return view('users.show', compact('user'));
+    }
+
+    /**
+     * Show the edit user form.
      */
     public function edit(PosUser $user)
     {
@@ -88,7 +96,6 @@ class UserController extends Controller
             $manager = new ImageManager(new Driver());
 
             $image = $manager->decode($request->file('avatar'));
-
             $image->cover(300, 300);
 
             $filename = 'avatars/' . Str::uuid() . '.png';
@@ -109,5 +116,21 @@ class UserController extends Controller
         return redirect()
             ->route('users.index')
             ->with('success', 'User account updated successfully!');
+    }
+
+    /**
+     * Delete a user account.
+     */
+    public function destroy(PosUser $user)
+    {
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User account deleted successfully!');
     }
 }

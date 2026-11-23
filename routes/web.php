@@ -4,39 +4,36 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 
-// Landing and About pages
+// Public pages
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 
-// Customer Accounts
-Route::get('/customers', [CustomerController::class, 'index'])
-    ->name('customers.index');
+// Authenticated dashboard
+Route::get('/dashboard', function () {
+    return redirect()->route('home');
+})->middleware('auth')->name('dashboard');
 
-Route::get('/customers/create', [CustomerController::class, 'create'])
-    ->name('customers.create');
+// Protected account management and profile routes
+Route::middleware('auth')->group(function () {
 
-Route::post('/customers', [CustomerController::class, 'store'])
-    ->name('customers.store');
+    // Customer resource routes
+    Route::resource('customers', CustomerController::class);
 
-Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
-    ->name('customers.edit');
+    // User resource routes
+    Route::resource('users', UserController::class);
 
-Route::put('/customers/{customer}', [CustomerController::class, 'update'])
-    ->name('customers.update');
+    // Breeze profile management
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
 
-// User Accounts
-Route::get('/users', [UserController::class, 'index'])
-    ->name('users.index');
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-Route::get('/users/create', [UserController::class, 'create'])
-    ->name('users.create');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+});
 
-Route::post('/users', [UserController::class, 'store'])
-    ->name('users.store');
-
-Route::get('/users/{user}/edit', [UserController::class, 'edit'])
-    ->name('users.edit');
-
-Route::put('/users/{user}', [UserController::class, 'update'])
-    ->name('users.update');
+// Breeze authentication routes
+require __DIR__.'/auth.php';

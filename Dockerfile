@@ -1,9 +1,25 @@
 
+# Stage 1: Build Breeze frontend assets
+FROM node:22-alpine AS frontend
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY vite.config.js postcss.config.js tailwind.config.js ./
+COPY resources ./resources
+
+RUN npm run build
+
+
+# Stage 2: Build Laravel application
 FROM php:8.5-cli
 
-# Install PHP extensions
+# Install PHP extension installer
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 
+# Install required PHP extensions
 RUN install-php-extensions \
     pdo_sqlite \
     sqlite3 \
@@ -21,6 +37,9 @@ WORKDIR /var/www/html
 
 # Copy Laravel application
 COPY . .
+
+# Copy compiled frontend assets
+COPY --from=frontend /app/public/build ./public/build
 
 # Install Laravel dependencies
 RUN composer install \
